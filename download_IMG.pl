@@ -7,10 +7,11 @@
 use strict;
 #use File::Download;
 
-my $path="/home/mnguyen/Research/Bacillus";
-my $filein_IMGID_list="Small_size.txt";
-my $folderout="IMG_small_size_30Apr2018";
+my $path="/home/mnguyen/Research/Bacillus/";
+my $filein_IMGID_list="new_IMG_IDs_11May2018.txt";
+my $folderout="new_IMG_IDs_11May2018";
 mkdir "$path/$folderout";
+chdir $path;
 
 #========================================================================================================#
 # Get list of CAZy families
