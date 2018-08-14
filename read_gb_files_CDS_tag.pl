@@ -7,12 +7,10 @@ use Bio::SeqIO;
 use Bio::SeqFeature::Generic;
 use Bio::DB::GenBank;
 
-my $folderin="/home/mnguyen/Research/Bacillus/GB/GB_CDs_tag";
-my $folderout_fasta="/home/mnguyen/Research/Bacillus/CDs_CDstag";
-my $folderout_annotation="/home/mnguyen/Research/Bacillus/Annotation_CDstag";
-my $folderout_protein="/home/mnguyen/Research/Bacillus/Protseq_CDstag";
-#my $fileout_test="/home/mnguyen/Research/Bacillus/RAST/antismash_submitted/test.txt";
-#open(TEST,">$fileout_test") || die "Cannot open file $fileout_test";
+my $folderin="/home/mnguyen/Research/Bacillus/GB/All_GB_files/have_CDS_tag";
+my $folderout_fasta="/home/mnguyen/Research/Bacillus/GB/All_GB_files/have_CDS_tag_CDs";
+my $folderout_annotation="/home/mnguyen/Research/Bacillus/GB/All_GB_files/have_CDS_tag_Annotation";
+my $folderout_protein="/home/mnguyen/Research/Bacillus/GB/All_GB_files/have_CDS_tag_Protseq";
 mkdir $folderout_annotation;
 mkdir $folderout_fasta;
 mkdir $folderout_protein;
@@ -24,7 +22,7 @@ foreach my $filein (@files)
 	if (($filein ne ".") and ($filein ne ".."))
 	{
 		$filecount++;
-		print "$filecount: $filein-----------------------------------------\n";
+		print "$filecount: $filein-----------------------------------------";
 		my $annotation_file=$filein;
 		$annotation_file=~s/^.+IMGID\_//;
 		$annotation_file=~s/\.gbk$//;
@@ -35,7 +33,7 @@ foreach my $filein (@files)
 		open(FASTA,">$folderout_fasta/$gene_seq_file") || die "Cannot open file $folderout_fasta/$gene_seq_file";
 		open(PROT_FASTA,">$folderout_protein/$prot_seq_file") || die "Cannot open file $folderout_protein/$prot_seq_file";
 		open(ANNOTATION,">$folderout_annotation/$annotation_file") || die "Cannot open file $folderout_annotation/$annotation_file";
-		print ANNOTATION "GeneID\tScaffold\tStrand\tStart\tEnd\tGene_length\tProtein_length\tFunction\tGene_seq\tProtein_seq\n";
+		print ANNOTATION "GeneID\tScaffold\tStrand\tStart\tEnd\tGene_length\tProtein_length\tFunction\tGene_seq\tProtein_seq\tLocus_tag\n";
 		my $seqio_obj = Bio::SeqIO->new(-file =>"$folderin/$filein", -format => "genbank");
 		
 		while (my $seq_obj = $seqio_obj->next_seq())
@@ -48,7 +46,7 @@ foreach my $filein (@files)
 				
 				if ($primary_tag eq 'CDS')
 				{
-					my $sequence="";
+					my $sequence=$feature_obj->spliced_seq()->seq();
 					my $protseq="";
 					my $start = $feature_obj->start();
 					my $end = $feature_obj->end();
@@ -60,15 +58,8 @@ foreach my $filein (@files)
 					my $locus_tag="";
 					for my $tag ($feature_obj->get_all_tags)
 					{
-						#if ($tag eq 'kbase_id')
-						#{
-						#	my @tag_values=$feature_obj->get_tag_values("$tag");
-						#	$geneID=$tag_values[0];
-						#	$geneID=~s/^.+IMGID\_//;#Bacillus_oleivorans_JC228_IMGID_2740891863.CDS.4501
-						#	$geneID=~s/\.CDS\./\_/;
-						#}
 						
-						if (($tag eq 'function') or ($tag eq 'product'))
+						if ($tag eq 'product')
 						{
 							my @tag_values=$feature_obj->get_tag_values("$tag");
 							$function=$tag_values[0];
@@ -93,9 +84,9 @@ foreach my $filein (@files)
 
 			}
 		}
+		print "done\n";
 		close(FASTA);
 		close(ANNOTATION);
-		#exit;
 	}
 }
 closedir(DIR);
