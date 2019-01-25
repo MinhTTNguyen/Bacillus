@@ -8,9 +8,9 @@ use Bio::SeqFeature::Generic;
 use Bio::DB::GenBank;
 
 my $folderin="/mnt/fs1/home/mnguyen/Research/Bacillus/Bacillus_of_interest_13Sep2018/Bacilus_subtilis/GenBank/have_protSeq/all_set1_set2_set3";
-my $folderout_fasta="/mnt/fs1/home/mnguyen/Research/Bacillus/Bacillus_of_interest_13Sep2018/Bacilus_subtilis/GenBank/have_protSeq/have_CDS_tag_CDs";
-my $folderout_annotation="/mnt/fs1/home/mnguyen/Research/Bacillus/Bacillus_of_interest_13Sep2018/Bacilus_subtilis/GenBank/have_protSeq/have_CDS_tag_Annotation";
-my $folderout_protein="/mnt/fs1/home/mnguyen/Research/Bacillus/Bacillus_of_interest_13Sep2018/Bacilus_subtilis/GenBank/have_protSeq/have_CDS_tag_Protseq";
+my $folderout_fasta="/mnt/fs1/home/mnguyen/Research/Bacillus/Bacillus_of_interest_13Sep2018/Bacilus_subtilis/GenBank/have_protSeq/have_CDS_tag_CDs_1";
+my $folderout_annotation="/mnt/fs1/home/mnguyen/Research/Bacillus/Bacillus_of_interest_13Sep2018/Bacilus_subtilis/GenBank/have_protSeq/have_CDS_tag_Annotation_1";
+my $folderout_protein="/mnt/fs1/home/mnguyen/Research/Bacillus/Bacillus_of_interest_13Sep2018/Bacilus_subtilis/GenBank/have_protSeq/have_CDS_tag_Protseq_1";
 mkdir $folderout_annotation;
 mkdir $folderout_fasta;
 mkdir $folderout_protein;
@@ -33,7 +33,7 @@ foreach my $filein (@files)
 		open(FASTA,">$folderout_fasta/$gene_seq_file") || die "Cannot open file $folderout_fasta/$gene_seq_file";
 		open(PROT_FASTA,">$folderout_protein/$prot_seq_file") || die "Cannot open file $folderout_protein/$prot_seq_file";
 		open(ANNOTATION,">$folderout_annotation/$annotation_file") || die "Cannot open file $folderout_annotation/$annotation_file";
-		print ANNOTATION "GeneID\tScaffold\tStrand\tStart\tEnd\tGene_length\tProtein_length\tFunction\tGene_seq\tProtein_seq\tLocus_tag\n";
+		print ANNOTATION "GeneID\tScaffold\tStrand\tStart\tEnd\tGene_length\tProtein_length\tFunction\tGene_seq\tProtein_seq\tLocus_tag\tProtein_id\n";
 		my $seqio_obj = Bio::SeqIO->new(-file =>"$folderin/$filein", -format => "genbank");
 		
 		while (my $seq_obj = $seqio_obj->next_seq())
@@ -56,6 +56,7 @@ foreach my $filein (@files)
 					my $geneID="";
 					my $function="";
 					my $locus_tag="";
+					my $protein_id="";
 					for my $tag ($feature_obj->get_all_tags)
 					{
 						
@@ -73,11 +74,16 @@ foreach my $filein (@files)
 							$protseq=$tag_values[0];
 							$prot_len=length($protseq);
 						}
+						
+						if ($tag eq 'protein_id')
+						{
+							my @tag_values=$feature_obj->get_tag_values("$tag");$protein_id=$tag_values[0];
+						}
 					}
 					if ($strand>0){$strand="Plus";}
 					else{$strand="Minus";}
 					$geneID=$imgid."|".$scaffold_id."|".$strand."|".$start."|".$end;
-					print ANNOTATION "$geneID\t$scaffold_id\t$strand\t$start\t$end\t$gene_length\t$prot_len\t$function\t$sequence\t$protseq\t$locus_tag\n";
+					print ANNOTATION "$geneID\t$scaffold_id\t$strand\t$start\t$end\t$gene_length\t$prot_len\t$function\t$sequence\t$protseq\t$locus_tag\t$protein_id\n";
 					print FASTA ">$geneID\n$sequence\n";
 					print PROT_FASTA ">$geneID\n$protseq\n";
 				}
